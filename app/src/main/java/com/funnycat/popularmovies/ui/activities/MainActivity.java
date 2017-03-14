@@ -153,6 +153,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    // TODO 1 cambiar a AsyncTaskLoader
+    // TODO 2 permitir el envio de cursor (favoritos)
     class LoadMoviesData extends AsyncTask<MovieListType, Void, List<Movie>>{
 
         private String TAG = "LoadMoviesData";

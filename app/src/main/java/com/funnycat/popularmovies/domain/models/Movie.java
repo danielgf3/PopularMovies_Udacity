@@ -6,39 +6,41 @@ import java.io.Serializable;
  * Created by daniel on 18/01/2017.
  */
 
+// TODO cambiar a Parcelable
+
 public class Movie implements Serializable{
     private int id;
     private String title;
     private String original_title;
     private String original_language;
     private String release_date;
-    private boolean adult;
+    private boolean isAdult;
     private String poster_path;
     private String overview;
     private String backdrop_path;
     private int vote_count;
     private float vote_average;
     private float popularity;
-    private boolean video;
+    private boolean hasVideo;
     private Integer[] genre_ids;
 
     public Movie(int id, String title, String original_title, String original_language,
-                 String release_date, boolean adult, String poster_path, String overview,
+                 String release_date, boolean isAdult, String poster_path, String overview,
                  String backdrop_path, int vote_count, float vote_average, float popularity,
-                 boolean video, Integer[] genre_ids) {
+                 boolean hasVideo, Integer[] genre_ids) {
         this.id = id;
         this.title = title;
         this.original_title = original_title;
         this.original_language = original_language;
         this.release_date = release_date;
-        this.adult = adult;
+        this.isAdult = isAdult;
         this.poster_path = poster_path;
         this.overview = overview;
         this.backdrop_path = backdrop_path;
         this.vote_count = vote_count;
         this.vote_average = vote_average;
         this.popularity = popularity;
-        this.video = video;
+        this.hasVideo = hasVideo;
         this.genre_ids = genre_ids;
     }
 
@@ -63,7 +65,7 @@ public class Movie implements Serializable{
     }
 
     public boolean isAdult() {
-        return adult;
+        return isAdult;
     }
 
     public String getPoster_path() {
@@ -90,8 +92,8 @@ public class Movie implements Serializable{
         return popularity;
     }
 
-    public boolean isVideo() {
-        return video;
+    public boolean hasVideo() {
+        return hasVideo;
     }
 
     public Integer[] getGenre_ids() {

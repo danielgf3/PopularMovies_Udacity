@@ -26,7 +26,7 @@ public class Movies_Request implements Command<List<Movie>> {
 
     private static String TAG = "Movies_Request";
 
-    private static String BASE_URL = "http://api.themoviedb.org/3/movie/";
+    private static String BASE_URL = "https://api.themoviedb.org/3/movie/";
     private static final String API_KEY_PARAM = "api_key";
 
     private String mUrl;

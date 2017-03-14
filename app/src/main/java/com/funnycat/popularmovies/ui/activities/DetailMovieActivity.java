@@ -1,20 +1,24 @@
 package com.funnycat.popularmovies.ui.activities;
 
 
+import android.database.Cursor;
+import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.funnycat.popularmovies.R;
+import com.funnycat.popularmovies.databinding.ActivityDetailMovieBinding;
+import com.funnycat.popularmovies.db.DbDataMapper;
+import com.funnycat.popularmovies.db.FavMovieContract.FavMovieEntry;
 import com.funnycat.popularmovies.domain.models.Movie;
 import com.funnycat.popularmovies.ui.fragments.OnFragmentInteractionListener;
 import com.funnycat.popularmovies.ui.fragments.SypnosisFragment;
@@ -25,51 +29,57 @@ import com.github.florent37.glidepalette.GlidePalette;
 
 public class DetailMovieActivity extends AppCompatActivity implements OnFragmentInteractionListener{
 
+    private static final String TAG = "DetailMovieActivity";
+
     private Movie mMovie;
+    private ActivityDetailMovieBinding mBinding;
 
-    private ImageView mIvBackground;
-    private ImageView mIvCover;
-    private ImageView mIvPoster;
-
-    private TextView mTvTitle;
-    private TextView mTvVote;
-    private TextView mTvVoteAverage;
-    private TextView mTvDate;
-
-    private CollapsingToolbarLayout mToolbarLayout;
+    private int mFav_id = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_movie);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail_movie);
+
+        setSupportActionBar(mBinding.toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        mToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
-        mToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-
-        mIvBackground = (ImageView) findViewById(R.id.iv_background);
-        mIvCover = (ImageView) findViewById(R.id.iv_cover);
-        mIvPoster = (ImageView) findViewById(R.id.iv_poster);
-        mTvTitle = (TextView) findViewById(R.id.tv_title);
-        mTvVote = (TextView) findViewById(R.id.tv_vote);
-        mTvVoteAverage = (TextView) findViewById(R.id.tv_vote_average);
-        mTvDate = (TextView) findViewById(R.id.tv_date);
-
+        mBinding.toolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
         mMovie = (Movie) getIntent().getSerializableExtra("content");
-        mToolbarLayout.setTitle(mMovie.getTitle());
+        mFav_id = getFavId();
+        mBinding.toolbarLayout.setTitle(mMovie.getTitle());
 
-        mTvTitle.setText(mMovie.getTitle());
-        mTvVote.setText(String.valueOf(mMovie.getVote_count()));
-        mTvVoteAverage.setText(String.valueOf(mMovie.getVote_average()));
-        mTvDate.setText(PMDateUtil.dateToString(this, PMDateUtil.getDate(mMovie.getRelease_date()), true));
+        mBinding.tvTitle.setText(mMovie.getTitle());
+        mBinding.tvVote.setText(String.valueOf(mMovie.getVote_count()));
+        mBinding.tvVoteAverage.setText(String.valueOf(mMovie.getVote_average()));
+        mBinding.tvDate.setText(PMDateUtil.dateToString(this, PMDateUtil.getDate(mMovie.getRelease_date()), true));
 
         loadHeader(MovieUtil.makeImageUrl(mMovie.getBackdrop_path(), true));
-        Glide.with(this).load(MovieUtil.makeImageUrl(mMovie.getPoster_path())).into(mIvPoster);
+        Glide.with(this).load(MovieUtil.makeImageUrl(mMovie.getPoster_path())).into(mBinding.ivPoster);
+
+        updateFavButton(false);
+        mBinding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean fail = false;
+                if(mFav_id != -1){
+                    if(removeFromFavorite()){
+                        Snackbar.make(view, "Unmarked " + mMovie.getTitle() + " as favourite", Snackbar.LENGTH_LONG).show();
+                    }else fail = true;
+                }else{
+                    if(addToFavorite()){
+                        Snackbar.make(view, "Marked " + mMovie.getTitle() + " as favourite", Snackbar.LENGTH_LONG).show();
+                    }else fail = true;
+                }
+
+                if(fail) Snackbar.make(view, "Failed to execute action. Try later.", Snackbar.LENGTH_LONG).show();
+                else updateFavButton(true);
+            }
+        });
 
         getSupportFragmentManager().beginTransaction().replace(R.id.content_generic,
                 SypnosisFragment.newInstance(0, mMovie.getOverview()), "fragment_0").commit();
@@ -80,21 +90,57 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
         Glide.with(this).load(url)
                 .listener(GlidePalette.with(url)
                         .use(GlidePalette.Profile.MUTED)
-                        .intoBackground(mIvBackground)
+                        .intoBackground(mBinding.ivBackground)
                         .crossfade(true)
 
                         .use(GlidePalette.Profile.VIBRANT)
-                        .intoTextColor(mTvTitle)
+                        .intoTextColor(mBinding.tvTitle)
 
                         .use(GlidePalette.Profile.MUTED)
                         .intoCallBack(new BitmapPalette.CallBack() {
                             @Override
                             public void onPaletteLoaded(@Nullable Palette palette) {
-                                mToolbarLayout.setStatusBarScrimColor(palette.getDarkMutedColor(getResources().getColor(R.color.colorPrimaryDark)));
-                                mToolbarLayout.setContentScrimColor(palette.getMutedColor(getResources().getColor(R.color.colorPrimary)));
+                                mBinding.toolbarLayout.setStatusBarScrimColor(palette.getDarkMutedColor(getResources().getColor(R.color.colorPrimaryDark)));
+                                mBinding.toolbarLayout.setContentScrimColor(palette.getMutedColor(getResources().getColor(R.color.colorPrimary)));
                             }})
                 )
-                .into(mIvCover);
+                .into(mBinding.ivCover);
+    }
+
+    private void updateFavButton(boolean animate){
+//        if(mFav_id!=-1) mBinding.fab.setImageDrawable(getBaseContext().getResources().getDrawable(R.drawable.ic_star));
+//        else mBinding.fab.setImageDrawable(getBaseContext().getResources().getDrawable(R.drawable.ic_star_border));
+        mBinding.fab.setFavorite(mFav_id!=-1, (mFav_id!=-1) && animate); // first: favourite, second: animate
+    }
+
+    private int getFavId(){
+        int favID = -1;
+        Cursor c = getContentResolver().query(FavMovieEntry.CONTENT_URI, null,
+                FavMovieEntry.COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(mMovie.getId())}, null);
+        if(c!= null && c.getCount() > 0){
+            c.moveToFirst();
+            favID = c.getInt(c.getColumnIndex(FavMovieEntry._ID));
+        }
+        if(c!=null && !c.isClosed()) c.close();
+        return favID;
+    }
+
+    private boolean addToFavorite(){
+        Uri uri = getContentResolver().insert(FavMovieEntry.CONTENT_URI, DbDataMapper.convertMoviefromDomain(mMovie));
+        if(uri != null) {
+            mFav_id = Integer.parseInt(uri.getLastPathSegment());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean removeFromFavorite(){
+        //TODO cambiar este id por el de la pelicula en la BD
+        if(getContentResolver().delete(FavMovieEntry.buildMovieUriWithId(mFav_id), null, null) != 0){
+            mFav_id = -1;
+            return true;
+        }
+        return false;
     }
 
     @Override
