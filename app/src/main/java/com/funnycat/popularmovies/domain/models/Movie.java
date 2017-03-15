@@ -1,14 +1,16 @@
 package com.funnycat.popularmovies.domain.models;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.funnycat.popularmovies.utils.CollectionUtils;
 
 /**
  * Created by daniel on 18/01/2017.
  */
 
-// TODO cambiar a Parcelable
 
-public class Movie implements Serializable{
+public class Movie implements Parcelable{
     private int id;
     private String title;
     private String original_title;
@@ -42,6 +44,12 @@ public class Movie implements Serializable{
         this.popularity = popularity;
         this.hasVideo = hasVideo;
         this.genre_ids = genre_ids;
+    }
+
+    private Movie(Parcel in){
+        this(in.readInt(), in.readString(), in.readString(), in.readString(), in.readString(),
+                (in.readInt()==1), in.readString(), in.readString(), in.readString(), in.readInt(),
+                in.readFloat(), in.readFloat(), (in.readInt()==1), CollectionUtils.splitIntegerArray(in.readString()));
     }
 
     public int getId() {
@@ -99,4 +107,37 @@ public class Movie implements Serializable{
     public Integer[] getGenre_ids() {
         return genre_ids;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(title);
+        dest.writeString(original_title);
+        dest.writeString(original_language);
+        dest.writeString(release_date);
+        dest.writeInt(isAdult? 1 : 0);
+        dest.writeString(poster_path);
+        dest.writeString(overview);
+        dest.writeString(backdrop_path);
+        dest.writeInt(vote_count);
+        dest.writeFloat(vote_average);
+        dest.writeFloat(popularity);
+        dest.writeInt(hasVideo? 1 : 0);
+        dest.writeString(CollectionUtils.concatIntegerArray(genre_ids));
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 }
