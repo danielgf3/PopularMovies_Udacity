@@ -10,7 +10,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -20,8 +19,8 @@ import com.funnycat.popularmovies.databinding.ActivityDetailMovieBinding;
 import com.funnycat.popularmovies.db.DbDataMapper;
 import com.funnycat.popularmovies.db.FavMovieContract.FavMovieEntry;
 import com.funnycat.popularmovies.domain.models.Movie;
+import com.funnycat.popularmovies.ui.fragments.DetailMovieFragment;
 import com.funnycat.popularmovies.ui.fragments.OnFragmentInteractionListener;
-import com.funnycat.popularmovies.ui.fragments.SypnosisFragment;
 import com.funnycat.popularmovies.utils.MovieUtil;
 import com.funnycat.popularmovies.utils.PMDateUtil;
 import com.github.florent37.glidepalette.BitmapPalette;
@@ -33,6 +32,7 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
 
     private Movie mMovie;
     private ActivityDetailMovieBinding mBinding;
+    private DetailMovieFragment mSypnosisF;
 
     private int mFav_id = -1;
 
@@ -49,7 +49,7 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
 
         mBinding.toolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
-        mMovie = (Movie) getIntent().getSerializableExtra("content");
+        mMovie = getIntent().getParcelableExtra("content");
         mFav_id = getFavId();
         mBinding.toolbarLayout.setTitle(mMovie.getTitle());
 
@@ -65,24 +65,21 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
         mBinding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean fail = false;
+                boolean success;
                 if(mFav_id != -1){
-                    if(removeFromFavorite()){
-                        Snackbar.make(view, "Unmarked " + mMovie.getTitle() + " as favourite", Snackbar.LENGTH_LONG).show();
-                    }else fail = true;
+                    success = removeFromFavorite();
                 }else{
-                    if(addToFavorite()){
-                        Snackbar.make(view, "Marked " + mMovie.getTitle() + " as favourite", Snackbar.LENGTH_LONG).show();
-                    }else fail = true;
+                    success = addToFavorite();
                 }
 
-                if(fail) Snackbar.make(view, "Failed to execute action. Try later.", Snackbar.LENGTH_LONG).show();
+                if(!success) Snackbar.make(view, "Failed to execute action. Try later.", Snackbar.LENGTH_LONG).show();
                 else updateFavButton(true);
             }
         });
 
+        mSypnosisF = DetailMovieFragment.newInstance(mMovie.getId(), mMovie.getOverview(), mMovie.isAdult());
         getSupportFragmentManager().beginTransaction().replace(R.id.content_generic,
-                SypnosisFragment.newInstance(0, mMovie.getOverview()), "fragment_0").commit();
+                mSypnosisF, "fragment_0").commit();
     }
 
 
@@ -91,7 +88,6 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
                 .listener(GlidePalette.with(url)
                         .use(GlidePalette.Profile.MUTED)
                         .intoBackground(mBinding.ivBackground)
-                        .crossfade(true)
 
                         .use(GlidePalette.Profile.VIBRANT)
                         .intoTextColor(mBinding.tvTitle)
@@ -108,8 +104,6 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
     }
 
     private void updateFavButton(boolean animate){
-//        if(mFav_id!=-1) mBinding.fab.setImageDrawable(getBaseContext().getResources().getDrawable(R.drawable.ic_star));
-//        else mBinding.fab.setImageDrawable(getBaseContext().getResources().getDrawable(R.drawable.ic_star_border));
         mBinding.fab.setFavorite(mFav_id!=-1, (mFav_id!=-1) && animate); // first: favourite, second: animate
     }
 
@@ -135,7 +129,6 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
     }
 
     private boolean removeFromFavorite(){
-        //TODO cambiar este id por el de la pelicula en la BD
         if(getContentResolver().delete(FavMovieEntry.buildMovieUriWithId(mFav_id), null, null) != 0){
             mFav_id = -1;
             return true;

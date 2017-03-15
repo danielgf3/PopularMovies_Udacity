@@ -15,7 +15,8 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/app_bar_big_height"
             android:fitsSystemWindows="true"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:elevation="0dp">
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/toolbar_layout"
@@ -63,33 +64,28 @@
                         app:layout_constraintLeft_toLeftOf="@+id/iv_background"
                         app:srcCompat="@drawable/default_poster" />
 
-                    <FrameLayout
+                    <com.github.ivbaranov.mfb.MaterialFavoriteButton
+                        android:id="@+id/fab"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_margin="@dimen/fab_margin"
-                        app:layout_anchorGravity="bottom|end"
-                        app:layout_anchor="@id/cl_cover"
                         android:background="@drawable/round"
+                        android:clickable="true"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintLeft_toRightOf="@+id/iv_poster"
-                        app:layout_constraintHorizontal_bias="0.955"
+                        app:layout_constraintHorizontal_bias="1.0"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.484" >
-                        <com.github.ivbaranov.mfb.MaterialFavoriteButton
-                            android:id="@+id/fab"
-                            android:layout_gravity="center"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:mfb_animate_favorite="true"
-                            app:mfb_padding="10"
-                            app:mfb_rotation_duration="400"
-                            app:mfb_rotation_angle="360"
-                            app:mfb_bounce_duration="300"
-                            app:mfb_color="white"
-                            app:mfb_type="heart"
-                            android:clickable="true"/>
-                    </FrameLayout>
+                        app:mfb_animate_favorite="true"
+                        app:mfb_padding="10"
+                        app:mfb_rotation_duration="400"
+                        app:mfb_rotation_angle="360"
+                        app:mfb_bounce_duration="300"
+                        app:mfb_color="white"
+                        app:mfb_type="star"
+                        app:layout_anchor="@id/cl_cover"
+                        app:layout_anchorGravity="bottom|end"
+                        android:layout_marginRight="16dp" />
 
                     <LinearLayout
                         android:id="@+id/linearLayout"
@@ -117,6 +113,7 @@
                             android:lines="2"
                             android:maxLines="2"
                             android:textSize="20sp"
+                            android:gravity="center_vertical"
                             android:transitionName="shared_title" />
 
                         <LinearLayout
@@ -171,8 +168,8 @@
                     android:title=""
                     app:layout_collapseMode="pin"
                     app:popupTheme="@style/AppTheme.PopupOverlay" />
-
             </android.support.design.widget.CollapsingToolbarLayout>
+
         </android.support.design.widget.AppBarLayout>
 
         <include layout="@layout/content_generic" />

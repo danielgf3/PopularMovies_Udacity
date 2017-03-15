@@ -5,8 +5,8 @@
     <color name="colorAccent">#FBC02D</color>
 
 
-
-
-
     <color name="black_translucent">#aa0b0a0a</color>
+
+    <color name="colorTextPrimary">@android:color/white</color>
+    <color name="colorTextSecondary">@android:color/darker_gray</color>
 </resources>
