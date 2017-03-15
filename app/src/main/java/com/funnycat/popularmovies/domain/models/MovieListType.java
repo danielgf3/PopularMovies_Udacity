@@ -6,7 +6,8 @@ package com.funnycat.popularmovies.domain.models;
 
 public enum MovieListType{
     POPULAR("popular"),
-    TOP_RATED("top_rated");
+    TOP_RATED("top_rated"),
+    FAVOURITES("favourites");
     public String path;
     MovieListType(String path){
         this.path = path;

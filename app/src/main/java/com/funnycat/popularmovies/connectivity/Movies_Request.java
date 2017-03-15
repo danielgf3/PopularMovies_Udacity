@@ -27,7 +27,6 @@ public class Movies_Request implements Command<List<Movie>> {
     private static String TAG = "Movies_Request";
 
     private static String BASE_URL = "https://api.themoviedb.org/3/movie/";
-    private static final String API_KEY_PARAM = "api_key";
 
     private String mUrl;
 
@@ -43,7 +42,7 @@ public class Movies_Request implements Command<List<Movie>> {
     private String buildUrl(MovieListType typeRequest){
         Uri uri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(typeRequest.path)
-                .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIES_API_KEY)
+                .appendQueryParameter("api_key", BuildConfig.MOVIES_API_KEY)
                 .build();
         return uri.toString();
     }

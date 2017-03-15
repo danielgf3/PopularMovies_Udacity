@@ -5,6 +5,7 @@ import android.database.Cursor;
 
 import com.funnycat.popularmovies.domain.models.Movie;
 import com.funnycat.popularmovies.db.FavMovieContract.FavMovieEntry;
+import com.funnycat.popularmovies.utils.CollectionUtils;
 
 
 /**
@@ -28,11 +29,7 @@ public class DbDataMapper {
         cv.put(FavMovieEntry.COLUMN_VOTE_AVERAGE, movie.getVote_average());
         cv.put(FavMovieEntry.COLUMN_POPULARITY, movie.getPopularity());
         cv.put(FavMovieEntry.COLUMN_HAS_VIDEO, movie.hasVideo()? 1 : 0);
-
-        StringBuilder sb = new StringBuilder();
-        for(Integer genre: movie.getGenre_ids()) sb.append(genre).append("|");
-        sb.substring(0, sb.length()-2);
-        cv.put(FavMovieEntry.COLUMN_GENRE_IDS, sb.toString());
+        cv.put(FavMovieEntry.COLUMN_GENRE_IDS, CollectionUtils.concatIntegerArray(movie.getGenre_ids()));
         return cv;
     }
 
@@ -54,11 +51,7 @@ public class DbDataMapper {
         float voteAverage = c.getFloat(c.getColumnIndex(FavMovieEntry.COLUMN_VOTE_AVERAGE));
         float popularity = c.getFloat(c.getColumnIndex(FavMovieEntry.COLUMN_POPULARITY));
         boolean hasVideo = c.getInt(c.getColumnIndex(FavMovieEntry.COLUMN_HAS_VIDEO)) == 1;
-        String[] genreIdsS = c.getString(c.getColumnIndex(FavMovieEntry.COLUMN_GENRE_IDS)).split("|");
-        Integer[] genreIdsI = new Integer[genreIdsS.length];
-        for(int i= 0; i<genreIdsS.length; i++){
-            genreIdsI[i] = Integer.parseInt(genreIdsS[i]);
-        }
+        Integer[] genreIdsI = CollectionUtils.splitIntegerArray(c.getString(c.getColumnIndex(FavMovieEntry.COLUMN_GENRE_IDS)));
         return new Movie(id, title, original_title, original_language, release_date, isAdult,
                 posterPath, overview, backdropPath, voteCount, voteAverage, popularity, hasVideo, genreIdsI);
     }

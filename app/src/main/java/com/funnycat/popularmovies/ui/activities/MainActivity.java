@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.util.Log;
@@ -34,12 +35,7 @@ public class MainActivity extends AppCompatActivity
 
     private static String TAG = "MainActivity";
 
-    private static int SORT_BY_POPULAR = R.id.sort_popular;
-    private static int SORT_BY_TOP_RATED = R.id.sort_rated;
-
-
-    private MovieListFragment mFragment;
-    private int mCurrentOrder = SORT_BY_POPULAR;
+    private int mCurrentOrder = R.id.sort_popular;
 
 
     @Override
@@ -58,9 +54,29 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mFragment = MovieListFragment.newInstance(0, 2);
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_generic,
-                mFragment, "fragment_0").commit();
+        if(savedInstanceState!=null && savedInstanceState.containsKey("currentOrder")) {
+            Log.d(TAG, "Teniamos algo");
+            mCurrentOrder = savedInstanceState.getInt("currentOrder");
+            Log.d(TAG, "El currentOrder guardado es: " + mCurrentOrder);
+            Log.d(TAG, "");
+            switch (mCurrentOrder) {
+                case R.id.sort_popular:
+                    changeFragment(MovieListType.POPULAR);
+                    break;
+                case R.id.sort_rated:
+                    changeFragment(MovieListType.TOP_RATED);
+                    break;
+                case R.id.sort_favourites:
+                    changeFragment(MovieListType.FAVOURITES);
+                    break;
+            }
+        }else changeFragment(MovieListType.POPULAR);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentOrder", mCurrentOrder);
     }
 
     @Override
@@ -85,17 +101,27 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         Log.d(TAG, "onOptionsItemSelected, id: " + id);
-        if (id == R.id.sort_popular || id == R.id.sort_rated){
+        if (id == R.id.sort_popular || id == R.id.sort_rated || id == R.id.sort_favourites){
             Log.d(TAG, "Vamos a ordenar");
             if(id != mCurrentOrder) {
-                if (id == R.id.sort_popular)
-                    new LoadMoviesData(mFragment).execute(MovieListType.POPULAR);
-                else new LoadMoviesData(mFragment).execute(MovieListType.TOP_RATED);
+                MovieListType type;
+                if (id == R.id.sort_popular) type = MovieListType.POPULAR;
+                else if(id == R.id.sort_rated) type = MovieListType.TOP_RATED;
+                else type = MovieListType.FAVOURITES;
+                changeFragment(type);
             }
             mCurrentOrder = id;
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void changeFragment(MovieListType type){
+
+        Log.d(TAG, "Vamos a cambiar el fragment");
+        MovieListFragment fragment = MovieListFragment.newInstance(type.ordinal(), type, getResources().getInteger(R.integer.num_columns));
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_generic,
+                fragment, type.name()).commit();
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -121,23 +147,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    @Override
     public void onFragmentInteraction(Bundle args) {
         if(args.containsKey(OnFragmentInteractionListener.ACTION) && args.getString(OnFragmentInteractionListener.ACTION) !=null) {
             switch (args.getString(OnFragmentInteractionListener.ACTION)) {
-                case OnFragmentInteractionListener.ACTION_CHARGE_INIT_DATA:
-                    new LoadMoviesData(mFragment).execute(MovieListType.POPULAR);
+
             }
         }
     }
@@ -145,37 +158,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStartNewActivity(Bundle args, Pair<View, String>... sharedElements) {
         Intent intent = new Intent(this, DetailMovieActivity.class);
-        intent.putExtra("content", args.getSerializable(OnFragmentInteractionListener.ARG_EXTRA));
+        intent.putExtra("content", args.getParcelable(OnFragmentInteractionListener.ARG_EXTRA));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElements);
             startActivity(intent, options.toBundle());
         }else startActivity(intent);
-    }
-
-
-    // TODO 1 cambiar a AsyncTaskLoader
-    // TODO 2 permitir el envio de cursor (favoritos)
-    class LoadMoviesData extends AsyncTask<MovieListType, Void, List<Movie>>{
-
-        private String TAG = "LoadMoviesData";
-        private MovieListFragment mMovieListF;
-
-        LoadMoviesData(MovieListFragment movieListF){
-            mMovieListF = movieListF;
-        }
-
-        @Override
-        protected List<Movie> doInBackground(MovieListType... params) {
-            Log.d(TAG, "doInBackground");
-            if(params.length>0) return new Movies_Request(params[0]).execute();
-            else return null;
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movies) {
-            super.onPostExecute(movies);
-            Log.d(TAG, "onPostExecute");
-            mMovieListF.chargeData(movies);
-        }
     }
 }
