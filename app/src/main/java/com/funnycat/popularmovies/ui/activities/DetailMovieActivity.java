@@ -1,7 +1,7 @@
 package com.funnycat.popularmovies.ui.activities;
 
 
-import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
@@ -9,12 +9,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.util.Pair;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.ShareActionProvider;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -30,6 +26,7 @@ import com.funnycat.popularmovies.utils.MovieUtil;
 import com.funnycat.popularmovies.utils.PMDateUtil;
 import com.github.florent37.glidepalette.BitmapPalette;
 import com.github.florent37.glidepalette.GlidePalette;
+import com.google.android.youtube.player.YouTubeIntents;
 
 public class DetailMovieActivity extends AppCompatActivity implements OnFragmentInteractionListener{
 
@@ -160,6 +157,13 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
 
     @Override
     public void onStartNewActivity(Bundle args, Pair<View, String>... sharedElements) {
-
+        if(args.containsKey("trailer_key")) {
+            String trailerKey = args.getString("trailer_key");
+            try {
+                startActivity(YouTubeIntents.createPlayVideoIntentWithOptions(this, trailerKey, true, true));
+            } catch (ActivityNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

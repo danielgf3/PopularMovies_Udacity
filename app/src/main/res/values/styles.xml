@@ -33,4 +33,15 @@
         <item name="android:textColor">@color/colorTextSecondary</item>
     </style>
 
+    <style name="DetailText.Small">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/colorTextSecondary</item>
+    </style>
+
+    <style name="DetailQuote" parent="@style/DetailText.Small">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">@color/colorTextSecondary</item>
+    </style>
+
 </resources>

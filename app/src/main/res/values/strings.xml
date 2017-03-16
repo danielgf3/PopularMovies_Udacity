@@ -119,4 +119,6 @@
     <string name="title_activity_main2">Main2Activity</string>
     <string name="subject_share">Popular Movies</string>
     <string name="vt_hashtag">#popular_movies</string>
+    <string name="reviews">Reviews</string>
+    <string name="communicate">Communicate</string>
 </resources>

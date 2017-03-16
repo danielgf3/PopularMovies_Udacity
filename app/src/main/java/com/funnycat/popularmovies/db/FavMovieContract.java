@@ -9,11 +9,11 @@ import android.provider.BaseColumns;
 
 public class FavMovieContract {
 
-    public static final String CONTENT_AUTHORITY = "com.funnycat.popularmovies";
+    static final String CONTENT_AUTHORITY = "com.funnycat.popularmovies";
 
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static final String PATH_FAV_MOVIE = "fav_movie";
+    static final String PATH_FAV_MOVIE = "fav_movie";
 
     public static final class FavMovieEntry implements BaseColumns{
 
@@ -22,7 +22,7 @@ public class FavMovieContract {
                 .appendPath(PATH_FAV_MOVIE)
                 .build();
 
-        public static final String TABLE_NAME = "fav_movies";
+        static final String TABLE_NAME = "fav_movies";
 
         public static final String COLUMN_MOVIE_ID = "movie_id";
         public static final String COLUMN_TITLE = "title";

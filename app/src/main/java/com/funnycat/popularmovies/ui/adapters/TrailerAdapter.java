@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.funnycat.popularmovies.R;
 import com.funnycat.popularmovies.domain.models.Trailer;
-import com.funnycat.popularmovies.utils.MovieUtil;
 
 import java.util.ArrayList;
 import java.util.List;

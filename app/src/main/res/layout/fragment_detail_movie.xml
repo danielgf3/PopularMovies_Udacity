@@ -4,72 +4,101 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.funnycat.popularmovies.ui.activities.DetailMovieActivity"
-    android:background="@color/colorPrimary"
-    android:layout_marginStart="@dimen/detail_horizontal_margin"
-    android:layout_marginEnd="@dimen/detail_horizontal_margin">
-
-    <android.support.constraint.ConstraintLayout
+    tools:context="com.funnycat.popularmovies.ui.activities.DetailMovieActivity">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_title_synopsis"
-            android:layout_width="wrap_content"
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/title_sypnosis"
-            style="@style/DetailSectionTitle"
-            android:layout_marginRight="16dp"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="16dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp" />
+            android:background="@color/colorPrimary"
+            android:layout_marginStart="@dimen/detail_horizontal_margin"
+            android:layout_marginEnd="@dimen/detail_horizontal_margin">
 
-        <TextView
-            android:id="@+id/tv_text_synopsis"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintLeft_toLeftOf="@+id/tv_title_synopsis"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title_synopsis"
-            style="@style/DetailText"
-            android:layout_marginRight="16dp"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="0dp"
-            app:layout_constraintHorizontal_bias="0.0" />
+            <TextView
+                android:id="@+id/tv_title_synopsis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_sypnosis"
+                style="@style/DetailSectionTitle"
+                android:layout_marginRight="8dp"
+                app:layout_constraintRight_toRightOf="parent"
+                android:layout_marginLeft="16dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp" />
 
-        <TextView
-            android:id="@+id/tv_title_trailer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/trailers"
-            style="@style/DetailSectionTitle"
-            android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@+id/tv_text_synopsis"
-            app:layout_constraintLeft_toLeftOf="@+id/tv_text_synopsis"
-            android:layout_marginLeft="0dp" />
+            <TextView
+                android:id="@+id/tv_text_synopsis"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toLeftOf="@+id/tv_title_synopsis"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title_synopsis"
+                style="@style/DetailText"
+                android:layout_marginRight="16dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                android:layout_marginEnd="16dp" />
 
+            <TextView
+                android:id="@+id/tv_title_trailer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/trailers"
+                style="@style/DetailSectionTitle"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@+id/tv_text_synopsis"
+                app:layout_constraintLeft_toLeftOf="@+id/tv_text_synopsis" />
+
+            <FrameLayout
+                android:id="@+id/fl_trailers"
+                android:layout_width="wrap_content"
+                android:layout_height="210dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title_trailer"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintHorizontal_bias="0.503">
+
+                <include android:id="@+id/l_trailers" layout="@layout/list"/>
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_title_review"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reviews"
+                style="@style/DetailSectionTitle"
+                android:layout_marginLeft="8dp"
+                app:layout_constraintLeft_toLeftOf="@+id/tv_title_trailer"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@+id/fl_trailers" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                app:layout_constraintRight_toRightOf="parent"
+                android:layout_marginLeft="16dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintHorizontal_bias="1.0"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title_review"
+                app:layout_constraintVertical_bias="0.0">
+
+                <include android:id="@+id/l_reviews" layout="@layout/list"/>
+            </FrameLayout>
+        </android.support.constraint.ConstraintLayout>
         <FrameLayout
-            android:id="@+id/fl_trailers"
-            android:layout_width="wrap_content"
-            android:layout_height="210dp"
-            android:layout_marginBottom="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title_trailer"
-            app:layout_constraintVertical_bias="0.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
-
-            <include layout="@layout/list"/>
-
-
-        </FrameLayout>
-
-
-    </android.support.constraint.ConstraintLayout>
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/activity_vertical_margin"/>
+    </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

@@ -4,7 +4,7 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_popular_movies"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_menu_popular"
             android:title="@string/popular" />
         <item
             android:id="@+id/nav_rated_movies"
@@ -20,7 +20,7 @@
             android:title="@string/action_settings" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="@string/communicate">
         <menu>
             <item
                 android:id="@+id/nav_share"

@@ -9,17 +9,17 @@ import com.funnycat.popularmovies.db.FavMovieContract.FavMovieEntry;
  * Created by daniel on 14/03/2017.
  */
 
-public class FavMovieDBHelper extends SQLiteOpenHelper {
+class FavMovieDBHelper extends SQLiteOpenHelper {
 
     /*
      * This is the name of our database. Database names should be descriptive and end with the
      * .db extension.
      */
-    public static final String DATABASE_NAME = "fav_movies.db";
+    private static final String DATABASE_NAME = "fav_movies.db";
 
     private static final int DATABASE_VERSION = 1;
 
-    public FavMovieDBHelper(Context context) {
+    FavMovieDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

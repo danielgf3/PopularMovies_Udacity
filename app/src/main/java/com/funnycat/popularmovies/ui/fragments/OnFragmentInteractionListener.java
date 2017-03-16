@@ -10,7 +10,6 @@ import android.view.View;
 
 public interface OnFragmentInteractionListener {
     String ACTION = "action";
-    String ACTION_CHARGE_INIT_DATA = "charge_init_data";
     String ARG_EXTRA = "extra";
 
     void onFragmentInteraction(Bundle args);

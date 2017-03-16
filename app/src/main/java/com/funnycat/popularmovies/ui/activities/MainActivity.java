@@ -51,7 +51,10 @@ public class MainActivity extends AppCompatActivity
             mCurrentOrder = MovieListType.valueOf(savedInstanceState.getString("currentOrder"));
             Log.d(TAG, "El currentOrder guardado es: " + mCurrentOrder);
             changeFragment(mCurrentOrder);
-        }else changeFragment(MovieListType.POPULAR);
+        }else{
+            navigationView.getMenu().getItem(0).setChecked(true);
+            onNavigationItemSelected(navigationView.getMenu().getItem(0));
+        }
     }
 
     @Override
@@ -84,7 +87,6 @@ public class MainActivity extends AppCompatActivity
 
     private void changeFragment(MovieListType type){
 
-        Log.d(TAG, "Vamos a cambiar el fragment");
         MovieListFragment fragment = MovieListFragment.newInstance(type.ordinal(), type, getResources().getInteger(R.integer.num_columns));
         getSupportFragmentManager().beginTransaction().replace(R.id.content_generic,
                 fragment, type.name()).commit();
@@ -120,8 +122,9 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @SafeVarargs
     @Override
-    public void onStartNewActivity(Bundle args, Pair<View, String>... sharedElements) {
+    public final void onStartNewActivity(Bundle args, Pair<View, String>... sharedElements) {
         Intent intent = new Intent(this, DetailMovieActivity.class);
         intent.putExtra("content", args.getParcelable(OnFragmentInteractionListener.ARG_EXTRA));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
