@@ -25,13 +25,13 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.DetailMovieActivity"
-            android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <provider
             android:name=".db.FavMovieProvider"
             android:authorities="com.funnycat.popularmovies"
             android:exported="false" />
+
     </application>
 
 </manifest>

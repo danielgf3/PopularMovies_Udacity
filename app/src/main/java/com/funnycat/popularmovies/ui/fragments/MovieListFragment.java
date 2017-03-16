@@ -53,6 +53,7 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
 
     private ProgressBar mProgressB;
     private LinearLayout mEmptyLayout;
+    private LinearLayout mErrorLayout;
     private RecyclerView mRecyclerView;
 
 
@@ -109,18 +110,26 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
         mRecyclerView.setHasFixedSize(true);
         mProgressB = (ProgressBar) view.findViewById(R.id.pb_loading);
         mEmptyLayout = (LinearLayout) view.findViewById(R.id.ll_empty_layout);
+        mErrorLayout = (LinearLayout) view.findViewById(R.id.ll_error_layout);
 
+        initLoader();
+        return view;
+    }
 
-        changeVisibilityStartLoading();
+    @Override
+    public void onResume() {
+        super.onResume();
+//        initLoader();
+    }
+
+    private void initLoader(){
         LoaderManager loader = getActivity().getSupportLoaderManager();
-
         Loader<Cursor> movieLoader = loader.getLoader(mType.ordinal());
         if(movieLoader==null){
             loader.initLoader(mType.ordinal(), null, this);
         }else{
             loader.restartLoader(mType.ordinal(), null, this);
         }
-        return view;
     }
 
     @Override
@@ -144,12 +153,22 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
         mProgressB.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.GONE);
         mEmptyLayout.setVisibility(View.GONE);
+        mErrorLayout.setVisibility(View.GONE);
     }
 
-    private void changeVisibilityFinishLoading(boolean isEmpty){
+    private void changeVisibilityFinishLoading(boolean success, boolean isEmpty){
         mProgressB.setVisibility(View.GONE);
         mRecyclerView.setVisibility((isEmpty)?View.GONE : View.VISIBLE);
-        mEmptyLayout.setVisibility((isEmpty)?View.VISIBLE : View.GONE);
+        mEmptyLayout.setVisibility((isEmpty && success)?View.VISIBLE : View.GONE);
+        mErrorLayout.setVisibility((!success)? View.VISIBLE : View.GONE);
+        if(!success){
+            mErrorLayout.findViewById(R.id.bt_retry).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    initLoader();
+                }
+            });
+        }
     }
 
     @Override
@@ -162,37 +181,38 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
 
     @Override
     public Loader<Cursor> onCreateLoader(final int id, Bundle args) {
-        if(id == mId){
+        if(id == mId) {
             Log.d(TAG, "onCreateLoader, id: " + id);
-            return new AsyncTaskLoader<Cursor>(getContext()) {
 
-                Cursor mData = null;
+            if (id == MovieListType.FAVOURITES.ordinal()) {
+                Uri movieQueryUri = FavMovieContract.FavMovieEntry.CONTENT_URI;
+                return new CursorLoader(getContext(), movieQueryUri, null, null, null, FavMovieContract.FavMovieEntry.DEFAULT_SORT);
+            } else {
+                return new AsyncTaskLoader<Cursor>(getContext()) {
+                    Cursor mData = null;
 
-                @Override
-                protected void onStartLoading() {
-                    if (mData != null) {
-                        deliverResult(mData);
-                    } else {
-                        forceLoad();
+                    @Override
+                    protected void onStartLoading() {
+                        if (mData != null) {
+                            deliverResult(mData);
+                        } else {
+                            changeVisibilityStartLoading();
+                            forceLoad();
+                        }
                     }
-                }
 
-                @Override
-                public Cursor loadInBackground() {
-                    if(id == MovieListType.FAVOURITES.ordinal()){
-                        Uri movieQueryUri = FavMovieContract.FavMovieEntry.CONTENT_URI;
-                        return getContext().getContentResolver().query(movieQueryUri, null, null, null, FavMovieContract.FavMovieEntry.DEFAULT_SORT);
-                    }else{
+                    @Override
+                    public Cursor loadInBackground() {
                         return MovieUtil.convertListToCursor(new Movies_Request(mType).execute());
                     }
-                }
 
-                @Override
-                public void deliverResult(Cursor data) {
-                    mData = data;
-                    super.deliverResult(data);
-                }
-            };
+                    @Override
+                    public void deliverResult(Cursor data) {
+                        mData = data;
+                        super.deliverResult(data);
+                    }
+                };
+            }
 
         }else throw new RuntimeException("Loader Not Implemented: " + id);
     }
@@ -200,7 +220,7 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
-        changeVisibilityFinishLoading(mAdapter.getItemCount() == 0);
+        changeVisibilityFinishLoading(data != null, mAdapter.getItemCount() == 0);
     }
 
     @Override

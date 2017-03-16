@@ -2,6 +2,7 @@ package com.funnycat.popularmovies.ui.fragments;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,16 +10,20 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.funnycat.popularmovies.R;
 import com.funnycat.popularmovies.connectivity.Trailers_Request;
@@ -36,16 +41,22 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
 
     private static final String ARG_ID = "id";
     private static final String ARG_SYPNOSIS = "sypnosis";
-    private static final String ARG_HAS_TRAILERS = "hasTrailers";
 
     private int mId;
     private String mSypnosis;
-    private boolean mHasTrailer;
 
     private ProgressBar mProgressB;
     private LinearLayout mEmptyLayout;
     private RecyclerView mRecyclerView;
+    private LinearLayout mErrorLayout;
     private TextView mTitleTrailer;
+
+
+    private ShareActionProvider mShareActionProvider;
+    private MenuItem mShareItem;
+
+
+    private String mTrailerKey;
 
     private TrailerAdapter mAdapter;
 
@@ -61,15 +72,13 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
      *
      * @param id Parameter 1.
      * @param sypnosis Parameter 2.
-     * @param hasTrailers Parameter 2.
      * @return A new instance of fragment DetailMovieFragment.
      */
-    public static DetailMovieFragment newInstance(int id, String sypnosis, boolean hasTrailers) {
+    public static DetailMovieFragment newInstance(int id, String sypnosis) {
         DetailMovieFragment fragment = new DetailMovieFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_ID, id);
         args.putString(ARG_SYPNOSIS, sypnosis);
-        args.putBoolean(ARG_HAS_TRAILERS, hasTrailers);
         fragment.setArguments(args);
         return fragment;
     }
@@ -80,8 +89,8 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
         if (getArguments() != null) {
             mId = getArguments().getInt(ARG_ID);
             mSypnosis = getArguments().getString(ARG_SYPNOSIS);
-            mHasTrailer = getArguments().getBoolean(ARG_HAS_TRAILERS);
         }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -99,17 +108,51 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
 
         mProgressB = (ProgressBar) view.findViewById(R.id.pb_loading);
         mEmptyLayout = (LinearLayout) view.findViewById(R.id.ll_empty_layout);
-        changeVisibilityStartLoading();
-        LoaderManager loader = getActivity().getSupportLoaderManager();
+        mErrorLayout = (LinearLayout) view.findViewById(R.id.ll_error_layout);
 
-        Loader<Cursor> movieLoader = loader.getLoader(mId);
-        if(movieLoader==null){
-            loader.initLoader(mId, null, this);
-        }else{
-            loader.restartLoader(mId, null, this);
-        }
+        initLoader(mId);
+
         return view;
     }
+
+    private void initLoader(int id){
+        LoaderManager loader = getActivity().getSupportLoaderManager();
+        Loader<Cursor> movieLoader = loader.getLoader(id);
+        if(movieLoader==null){
+            loader.initLoader(id, null, this);
+        }else{
+            loader.restartLoader(id, null, this);
+        }
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_detail_movie, menu);
+        mShareItem = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(mShareItem);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    private void configureShareActionProvider(String trailerKey) {
+        mShareItem.setVisible(true);
+        Intent myShareIntent = new Intent(Intent.ACTION_SEND);
+        myShareIntent.setType("text/plain");
+        myShareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.subject_share));
+        String extra_text = "https://www.youtube.com/watch?v="+ trailerKey + " " + getString(R.string.vt_hashtag);
+        Log.d(TAG, "vamos a compartir la url: " + extra_text);
+        myShareIntent.putExtra(Intent.EXTRA_TEXT, extra_text);
+        mShareActionProvider.setShareIntent(myShareIntent);
+    }
+
+
 
     @Override
     public void onAttach(Context context) {
@@ -132,14 +175,24 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
         mProgressB.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.GONE);
         mEmptyLayout.setVisibility(View.GONE);
+        mErrorLayout.setVisibility(View.GONE);
         mTitleTrailer.setVisibility(View.GONE);
     }
 
     private void changeVisibilityFinishLoading(boolean success, boolean isEmpty){
         mProgressB.setVisibility(View.GONE);
         mRecyclerView.setVisibility((isEmpty)?View.GONE : View.VISIBLE);
-        mEmptyLayout.setVisibility((!success && isEmpty)?View.VISIBLE : View.GONE);
+        mEmptyLayout.setVisibility((success && isEmpty)?View.VISIBLE : View.GONE);
+        mErrorLayout.setVisibility((!success && isEmpty)?View.VISIBLE : View.GONE);
         mTitleTrailer.setVisibility((isEmpty)?View.GONE : View.VISIBLE);
+        if(!success){
+            mErrorLayout.findViewById(R.id.bt_retry).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    initLoader(mId);
+                }
+            });
+        }
     }
 
     @Override
@@ -155,6 +208,7 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
                     if (mData != null) {
                         deliverResult(mData);
                     } else {
+                        changeVisibilityStartLoading();
                         forceLoad();
                     }
                 }
@@ -176,9 +230,12 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
 
     @Override
     public void onLoadFinished(Loader<List<Trailer>> loader, List<Trailer> data) {
-        mAdapter.swapData(data);
-        mRecyclerView.smoothScrollToPosition(0);
-        changeVisibilityFinishLoading(data!=null, mAdapter.getItemCount() == 0);
+        if(data!=null){
+            mAdapter.swapData(data);
+            mRecyclerView.smoothScrollToPosition(0);
+            configureShareActionProvider(data.get(0).getKey());
+        }
+        changeVisibilityFinishLoading(data!=null, (data==null) || data.size() == 0);
     }
 
     @Override

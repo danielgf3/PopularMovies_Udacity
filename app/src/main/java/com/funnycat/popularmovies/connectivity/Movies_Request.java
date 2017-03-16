@@ -57,7 +57,6 @@ public class Movies_Request implements Command<List<Movie>> {
             Response response = client.newCall(request).execute();
             if(response.isSuccessful()){
                 String body = response.body().string();
-                Log.d(TAG, "body: " + body);
                 JSONObject jsonBody = new JSONObject(body);
                 JSONArray resultArray = new JSONArray(jsonBody.getString("results"));
                 Gson gson = new Gson();

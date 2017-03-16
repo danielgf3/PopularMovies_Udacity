@@ -1,10 +1,8 @@
 package com.funnycat.popularmovies.ui.activities;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.util.Log;
@@ -17,25 +15,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.funnycat.popularmovies.R;
-import com.funnycat.popularmovies.connectivity.Movies_Request;
-import com.funnycat.popularmovies.domain.models.Movie;
 import com.funnycat.popularmovies.domain.models.MovieListType;
 import com.funnycat.popularmovies.ui.fragments.MovieListFragment;
 import com.funnycat.popularmovies.ui.fragments.OnFragmentInteractionListener;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
 
     private static String TAG = "MainActivity";
 
-    private int mCurrentOrder = R.id.sort_popular;
+    private MovieListType mCurrentOrder = MovieListType.POPULAR;
 
 
     @Override
@@ -56,27 +48,16 @@ public class MainActivity extends AppCompatActivity
 
         if(savedInstanceState!=null && savedInstanceState.containsKey("currentOrder")) {
             Log.d(TAG, "Teniamos algo");
-            mCurrentOrder = savedInstanceState.getInt("currentOrder");
+            mCurrentOrder = MovieListType.valueOf(savedInstanceState.getString("currentOrder"));
             Log.d(TAG, "El currentOrder guardado es: " + mCurrentOrder);
-            Log.d(TAG, "");
-            switch (mCurrentOrder) {
-                case R.id.sort_popular:
-                    changeFragment(MovieListType.POPULAR);
-                    break;
-                case R.id.sort_rated:
-                    changeFragment(MovieListType.TOP_RATED);
-                    break;
-                case R.id.sort_favourites:
-                    changeFragment(MovieListType.FAVOURITES);
-                    break;
-            }
+            changeFragment(mCurrentOrder);
         }else changeFragment(MovieListType.POPULAR);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("currentOrder", mCurrentOrder);
+        outState.putString("currentOrder", mCurrentOrder.name());
     }
 
     @Override
@@ -98,21 +79,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        Log.d(TAG, "onOptionsItemSelected, id: " + id);
-        if (id == R.id.sort_popular || id == R.id.sort_rated || id == R.id.sort_favourites){
-            Log.d(TAG, "Vamos a ordenar");
-            if(id != mCurrentOrder) {
-                MovieListType type;
-                if (id == R.id.sort_popular) type = MovieListType.POPULAR;
-                else if(id == R.id.sort_rated) type = MovieListType.TOP_RATED;
-                else type = MovieListType.FAVOURITES;
-                changeFragment(type);
-            }
-            mCurrentOrder = id;
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -122,6 +88,7 @@ public class MainActivity extends AppCompatActivity
         MovieListFragment fragment = MovieListFragment.newInstance(type.ordinal(), type, getResources().getInteger(R.integer.num_columns));
         getSupportFragmentManager().beginTransaction().replace(R.id.content_generic,
                 fragment, type.name()).commit();
+        mCurrentOrder = type;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -131,13 +98,15 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         Log.d(TAG, "onNavigationItemSelected, id: " + id);
-        if (id == R.id.nav_movies) {
-
+        if (id == R.id.nav_popular_movies) {
+            changeFragment(MovieListType.POPULAR);
+        }else if(id == R.id.nav_rated_movies) {
+            changeFragment(MovieListType.TOP_RATED);
+        }else if(id == R.id.nav_favourites_movies){
+            changeFragment(MovieListType.FAVOURITES);
         } else if(id == R.id.nav_settings) {
             Toast.makeText(this, R.string.not_yet_implemented, Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_share) {
-            Toast.makeText(this, R.string.not_yet_implemented, Toast.LENGTH_LONG).show();
-        } else if (id == R.id.nav_send) {
             Toast.makeText(this, R.string.not_yet_implemented, Toast.LENGTH_LONG).show();
         }
 
@@ -148,11 +117,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onFragmentInteraction(Bundle args) {
-        if(args.containsKey(OnFragmentInteractionListener.ACTION) && args.getString(OnFragmentInteractionListener.ACTION) !=null) {
-            switch (args.getString(OnFragmentInteractionListener.ACTION)) {
 
-            }
-        }
     }
 
     @Override

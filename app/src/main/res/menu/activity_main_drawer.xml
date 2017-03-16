@@ -3,9 +3,17 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_movies"
+            android:id="@+id/nav_popular_movies"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/movies" />
+            android:title="@string/popular" />
+        <item
+            android:id="@+id/nav_rated_movies"
+            android:icon="@drawable/ic_menu_top_rated"
+            android:title="@string/top_rated" />
+        <item
+            android:id="@+id/nav_favourites_movies"
+            android:icon="@drawable/ic_menu_favorite"
+            android:title="@string/favourites" />
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_menu_manage"
@@ -18,10 +26,6 @@
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
                 android:title="@string/share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="@string/send" />
         </menu>
     </item>
 

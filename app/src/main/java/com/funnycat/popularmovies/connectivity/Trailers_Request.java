@@ -56,7 +56,6 @@ public class Trailers_Request implements Command<List<Trailer>> {
             Response response = client.newCall(request).execute();
             if(response.isSuccessful()){
                 String body = response.body().string();
-                Log.d(TAG, "body: " + body);
                 JSONObject jsonBody = new JSONObject(body);
                 JSONArray resultArray = new JSONArray(jsonBody.getString("results"));
                 Gson gson = new Gson();
@@ -64,7 +63,6 @@ public class Trailers_Request implements Command<List<Trailer>> {
                 for(int i=0; i<resultArray.length(); i++){
                     resultList.add(gson.fromJson(resultArray.getString(i), Trailer.class));
                 }
-                Log.d(TAG, "tenemos: " + resultList.size() +" trailers");
                 loadCover(resultList);
                 return resultList;
             }
@@ -82,13 +80,10 @@ public class Trailers_Request implements Command<List<Trailer>> {
                     .url("https://www.googleapis.com/youtube/v3/videos?id="+ trailer.getKey()
                     + "&key=" + BuildConfig.YOUTUBE_API_KEY + "%20&part=snippet")
                     .build();
-            Log.d(TAG, "URL: " + "https://www.googleapis.com/youtube/v3/videos?id="+ trailer.getKey()
-                    + "&key=" + BuildConfig.YOUTUBE_API_KEY + "%20&part=snippet");
             try {
                 Response response = client.newCall(request).execute();
                 if(response.isSuccessful()){
                     JSONObject json = new JSONObject(response.body().string());
-                    Log.d(TAG, "YOUTUBE: " + json.toString());
                     if(json.has("items")){
                         JSONArray jsonItems = new JSONArray(json.getString("items"));
                         JSONObject jsonSnippet = new JSONObject(new JSONObject(jsonItems.get(0).toString()).getString("snippet"));

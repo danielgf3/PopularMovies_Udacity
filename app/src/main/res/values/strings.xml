@@ -115,4 +115,8 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="trailers">Trailers</string>
+    <string name="no_items_in_list">There are no items in this list</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="subject_share">Popular Movies</string>
+    <string name="vt_hashtag">#popular_movies</string>
 </resources>
