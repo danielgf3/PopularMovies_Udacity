@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -24,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.funnycat.popularmovies.R;
 import com.funnycat.popularmovies.connectivity.Reviews_Request;
 import com.funnycat.popularmovies.connectivity.Trailers_Request;
@@ -111,15 +108,13 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
         mRecyclerViewT = (RecyclerView) mFatherTrailers.findViewById(R.id.list);
         mRecyclerViewT.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, true));
         mRecyclerViewT.setAdapter(mTAdapter = new TrailerAdapter(this));
-        initLoader(mId, ID_TRAILERS);
 
         // Reviews
         mFatherReviews = view.findViewById(R.id.l_reviews);
         mRecyclerViewR = (RecyclerView) mFatherReviews.findViewById(R.id.list);
         mRecyclerViewR.setAdapter(mRAdapter = new ReviewAdapter());
 
-
-        initLoader(mId, ID_REVIEWS);
+        initLoader(mId, ID_TRAILERS);
 
         return view;
     }
@@ -179,6 +174,13 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
         mListener = null;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mTAdapter.swapData(null);
+        mRAdapter.swapData(null);
+    }
+
     private void changeVisibilityStartLoading(int type){
         View father = (type==ID_TRAILERS)? mFatherTrailers : mFatherReviews;
         father.findViewById(R.id.list).setVisibility(View.GONE);
@@ -202,9 +204,9 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
                     initLoader(mId, type);
                 }
             });
-        }else if(isEmpty){
-            if(type == ID_TRAILERS) mTrailerTitle.setVisibility(View.GONE);
-            else mReviewTitle.setVisibility(View.GONE);
+        }else{
+            if(type == ID_TRAILERS) mTrailerTitle.setVisibility((isEmpty)? View.GONE : View.VISIBLE);
+            else mReviewTitle.setVisibility((isEmpty)? View.GONE: View.VISIBLE);
         }
     }
 
@@ -256,9 +258,11 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
             if(data!=null){
                 mTAdapter.swapData(data);
                 mRecyclerViewT.smoothScrollToPosition(0);
-                configureShareActionProvider(data.get(0).getKey());
+                if(!data.isEmpty()) configureShareActionProvider(data.get(0).getKey());
             }
             changeVisibilityFinishLoading(ID_TRAILERS, data!=null, (data==null) || data.size() == 0);
+
+            initLoader(mId, ID_REVIEWS);
         }
 
         @Override
@@ -305,10 +309,7 @@ public class DetailMovieFragment extends Fragment implements OnItemClickListener
 
         @Override
         public void onLoadFinished(Loader<List<Review>> loader, List<Review> data) {
-            if(data!=null){
-                mRAdapter.swapData(data);
-                mRecyclerViewR.smoothScrollToPosition(0);
-            }
+            if(data!=null) mRAdapter.swapData(data);
             changeVisibilityFinishLoading(ID_REVIEWS, data!=null, (data==null) || data.size() == 0);
         }
 

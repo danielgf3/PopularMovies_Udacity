@@ -91,14 +91,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
             });
 
 
-            Glide.with(mItemView.getContext())
-                    .load(MovieUtil.makeImageUrl(movie.getPoster_path()))
-//                    .centerCrop()
-//                    .override(500, 375)
-//                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-//                    .placeholder(placeholder)
-//                    .error(R.drawable.default_article)
-                    .into(mIV_cover);
+            Glide.with(mItemView.getContext()).load(MovieUtil.makeImageUrl(movie.getPoster_path())).into(mIV_cover);
             mTV_title.setText(movie.getTitle());
         }
 

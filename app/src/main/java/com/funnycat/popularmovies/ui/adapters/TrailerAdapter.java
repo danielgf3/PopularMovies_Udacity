@@ -86,14 +86,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
             });
 
             Log.d(TAG, "------ url: " + trailer.getCover());
-            Glide.with(mItemView.getContext())
-                    .load(trailer.getCover())
-//                    .centerCrop()
-//                    .override(500, 375)
-//                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-//                    .placeholder(placeholder)
-//                    .error(R.drawable.default_article)
-                    .into(mIV_cover);
+            Glide.with(mItemView.getContext()).load(trailer.getCover()).into(mIV_cover);
             mTV_title.setText(trailer.getName());
         }
 
