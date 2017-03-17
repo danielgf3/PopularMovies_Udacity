@@ -2,10 +2,9 @@ package com.funnycat.popularmovies.ui.fragments;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -19,7 +18,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -30,37 +28,36 @@ import com.funnycat.popularmovies.domain.models.Movie;
 import com.funnycat.popularmovies.domain.models.MovieListType;
 import com.funnycat.popularmovies.ui.adapters.MoviesAdapter;
 import com.funnycat.popularmovies.ui.adapters.OnItemClickListener;
-import com.funnycat.popularmovies.utils.CollectionUtils;
 import com.funnycat.popularmovies.utils.MovieUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MovieListFragment extends Fragment implements OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final String TAG= "MovieListFragment";
 
-
-    public static final String ARG_COLUMN_COUNT = "column-count";
     public static final String ARG_ID = "id";
     public static final String ARG_TYPE = "type";
+    public static final String ARG_EXTRAS = "extras";
 
-    private static int DEFAULT_COLUMN_COUNT = 2;
+
+    private static final String ID_SAVED_LAYOUT_MANAGER = "saved_layout_manager";
+
+
 
     private int mId;
     private MovieListType mType;
-    private int mColumnCount;
 
     private ProgressBar mProgressB;
     private LinearLayout mEmptyLayout;
     private LinearLayout mErrorLayout;
     private RecyclerView mRecyclerView;
 
-
     private MoviesAdapter mAdapter;
 
-
     private OnFragmentInteractionListener mListener;
+
+
+    // Keep recyclerView Position
+    private Parcelable mLayoutManagerSavedState;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -71,40 +68,46 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
     }
 
 
-    public static MovieListFragment newInstance(int id, MovieListType type, int columnCount) {
+    public static MovieListFragment newInstance(int id, MovieListType type) {
+        Log.d(TAG, "entramos a crear uno nuevo");
+        return MovieListFragment.newInstance(id, type, null);
+    }
+
+    public static MovieListFragment newInstance(int id, MovieListType type, Bundle extras) {
         MovieListFragment fragment = new MovieListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_ID, id);
         args.putString(ARG_TYPE, type.name());
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
+        args.putParcelable(ARG_EXTRAS, extras);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public static MovieListFragment newInstance(int id, MovieListType type) {
-        return newInstance(id, type, DEFAULT_COLUMN_COUNT);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d(TAG, "onCreate");
         if (getArguments() != null) {
             mId = getArguments().getInt(ARG_ID);
             mType = MovieListType.valueOf(getArguments().getString(ARG_TYPE));
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            if(getArguments().containsKey(ARG_EXTRAS)){
+                Bundle extras = getArguments().getBundle(ARG_EXTRAS);
+                if(extras != null && extras.containsKey(ID_SAVED_LAYOUT_MANAGER)) mLayoutManagerSavedState = extras.getParcelable(ID_SAVED_LAYOUT_MANAGER);
+            }
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_movie_list, container, false);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.list);
 
-        if (mColumnCount <= 1) mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        else mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), mColumnCount));
+        int numColumnCount = getResources().getInteger(R.integer.num_columns);
+        if (numColumnCount <= 1) mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        else mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), numColumnCount));
 
         mRecyclerView.setAdapter(mAdapter = new MoviesAdapter(this));
         mRecyclerView.setHasFixedSize(true);
@@ -114,12 +117,6 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
 
         initLoader();
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-//        initLoader();
     }
 
     private void initLoader(){
@@ -147,6 +144,24 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mType != MovieListType.FAVOURITES) mRecyclerView.setAdapter(null);
+    }
+
+    private void restoreLayoutManagerPosition(){
+        if(mLayoutManagerSavedState!=null){
+            mRecyclerView.getLayoutManager().onRestoreInstanceState(mLayoutManagerSavedState);
+        }
+    }
+
+    public Bundle getExtrasToKeepState(){
+        Bundle b = new Bundle();
+        b.putParcelable(ID_SAVED_LAYOUT_MANAGER, mRecyclerView.getLayoutManager().onSaveInstanceState());
+        return b;
     }
 
     private void changeVisibilityStartLoading(){
@@ -182,8 +197,6 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
     @Override
     public Loader<Cursor> onCreateLoader(final int id, Bundle args) {
         if(id == mId) {
-            Log.d(TAG, "onCreateLoader, id: " + id);
-
             if (id == MovieListType.FAVOURITES.ordinal()) {
                 Uri movieQueryUri = FavMovieContract.FavMovieEntry.CONTENT_URI;
                 return new CursorLoader(getContext(), movieQueryUri, null, null, null, FavMovieContract.FavMovieEntry.DEFAULT_SORT);
@@ -221,6 +234,8 @@ public class MovieListFragment extends Fragment implements OnItemClickListener, 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
         changeVisibilityFinishLoading(data != null, mAdapter.getItemCount() == 0);
+        Log.d(TAG, "onLoadFinished, mLayoutManagerSavedState == null: " + (mLayoutManagerSavedState == null));
+        restoreLayoutManagerPosition();
     }
 
     @Override

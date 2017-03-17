@@ -3,7 +3,7 @@ package com.funnycat.popularmovies.domain.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.funnycat.popularmovies.utils.CollectionUtils;
+import com.funnycat.popularmovies.utils.CollectionUtil;
 
 /**
  * Created by daniel on 18/01/2017.
@@ -49,7 +49,7 @@ public class Movie implements Parcelable{
     private Movie(Parcel in){
         this(in.readInt(), in.readString(), in.readString(), in.readString(), in.readString(),
                 (in.readInt()==1), in.readString(), in.readString(), in.readString(), in.readInt(),
-                in.readFloat(), in.readFloat(), (in.readInt()==1), CollectionUtils.splitIntegerArray(in.readString()));
+                in.readFloat(), in.readFloat(), (in.readInt()==1), CollectionUtil.splitIntegerArray(in.readString()));
     }
 
     public int getId() {
@@ -80,12 +80,20 @@ public class Movie implements Parcelable{
         return poster_path;
     }
 
+    public void setPoster_path(String poster_path){
+        this.poster_path = poster_path;
+    }
+
     public String getOverview() {
         return overview;
     }
 
     public String getBackdrop_path() {
         return backdrop_path;
+    }
+
+    public void setBackdrop_path(String backdrop_path){
+        this.backdrop_path = backdrop_path;
     }
 
     public int getVote_count() {
@@ -128,7 +136,7 @@ public class Movie implements Parcelable{
         dest.writeFloat(vote_average);
         dest.writeFloat(popularity);
         dest.writeInt(hasVideo? 1 : 0);
-        dest.writeString(CollectionUtils.concatIntegerArray(genre_ids));
+        dest.writeString(CollectionUtil.concatIntegerArray(genre_ids));
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -140,4 +148,11 @@ public class Movie implements Parcelable{
             return new Movie[size];
         }
     };
+
+    public Movie copy(){
+        return new Movie(id, title, original_title, original_language,
+                release_date, isAdult, poster_path, overview,
+                backdrop_path, vote_count, vote_average, popularity,
+                hasVideo, genre_ids);
+    }
 }

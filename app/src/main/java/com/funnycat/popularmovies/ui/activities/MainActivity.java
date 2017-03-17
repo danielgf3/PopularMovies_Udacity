@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,6 +22,7 @@ import com.funnycat.popularmovies.R;
 import com.funnycat.popularmovies.domain.models.MovieListType;
 import com.funnycat.popularmovies.ui.fragments.MovieListFragment;
 import com.funnycat.popularmovies.ui.fragments.OnFragmentInteractionListener;
+import com.funnycat.popularmovies.utils.Util;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
@@ -28,6 +30,10 @@ public class MainActivity extends AppCompatActivity
     private static String TAG = "MainActivity";
 
     private MovieListType mCurrentOrder = MovieListType.POPULAR;
+
+    private SparseArray<MovieListFragment> mCategories = new SparseArray<>();
+
+    private MovieListFragment mCurrentFragment;
 
 
     @Override
@@ -47,10 +53,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         if(savedInstanceState!=null && savedInstanceState.containsKey("currentOrder")) {
-            Log.d(TAG, "Teniamos algo");
             mCurrentOrder = MovieListType.valueOf(savedInstanceState.getString("currentOrder"));
-            Log.d(TAG, "El currentOrder guardado es: " + mCurrentOrder);
-            changeFragment(mCurrentOrder);
+            changeFragment(mCurrentOrder, savedInstanceState.getBundle("extras"));
         }else{
             navigationView.getMenu().getItem(0).setChecked(true);
             onNavigationItemSelected(navigationView.getMenu().getItem(0));
@@ -59,8 +63,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putString("currentOrder", mCurrentOrder.name());
+        outState.putBundle("extras", mCurrentFragment.getExtrasToKeepState());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -86,10 +91,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void changeFragment(MovieListType type){
+        changeFragment(type, null);
+    }
 
-        MovieListFragment fragment = MovieListFragment.newInstance(type.ordinal(), type, getResources().getInteger(R.integer.num_columns));
+    private void changeFragment(MovieListType type, Bundle extras){
+        Util.clearGlide(this);
+        mCurrentFragment = mCategories.get(type.ordinal(), MovieListFragment.newInstance(type.ordinal(), type, extras));
+        mCategories.put(type.ordinal(), mCurrentFragment);
+
         getSupportFragmentManager().beginTransaction().replace(R.id.content_generic,
-                fragment, type.name()).commit();
+                mCurrentFragment, type.name()).commit();
         mCurrentOrder = type;
     }
 
