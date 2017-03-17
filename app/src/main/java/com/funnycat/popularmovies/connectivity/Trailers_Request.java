@@ -34,7 +34,6 @@ public class Trailers_Request implements Command<List<Trailer>> {
 
     public Trailers_Request(int movieId){
         mUrl = buildUrl(movieId);
-        Log.d(TAG, "URL: " + mUrl);
     }
 
     private String buildUrl(int movieId){

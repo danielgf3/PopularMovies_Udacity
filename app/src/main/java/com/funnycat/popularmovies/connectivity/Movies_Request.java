@@ -36,7 +36,6 @@ public class Movies_Request implements Command<List<Movie>> {
 
     public Movies_Request(MovieListType typeRequest, int page){
         mUrl = buildUrl(typeRequest);
-        Log.d(TAG, "URL: " + mUrl);
     }
 
     private String buildUrl(MovieListType typeRequest){

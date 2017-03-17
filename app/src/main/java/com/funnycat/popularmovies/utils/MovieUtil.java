@@ -59,7 +59,7 @@ public class MovieUtil {
                     .add(FavMovieContract.FavMovieEntry.COLUMN_VOTE_AVERAGE, m.getVote_average())
                     .add(FavMovieContract.FavMovieEntry.COLUMN_POPULARITY, m.getPopularity())
                     .add(FavMovieContract.FavMovieEntry.COLUMN_HAS_VIDEO, m.hasVideo()? 1:0)
-                    .add(FavMovieContract.FavMovieEntry.COLUMN_GENRE_IDS, CollectionUtils.concatIntegerArray(m.getGenre_ids()));
+                    .add(FavMovieContract.FavMovieEntry.COLUMN_GENRE_IDS, CollectionUtil.concatIntegerArray(m.getGenre_ids()));
         }
         return matrixC;
     }

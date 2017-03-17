@@ -4,7 +4,7 @@ package com.funnycat.popularmovies.utils;
  * Created by daniel on 15/03/2017.
  */
 
-public class CollectionUtils {
+public class CollectionUtil {
 
     public static String concatIntegerArray(Integer[] array) {
         StringBuilder sb = new StringBuilder();
@@ -20,7 +20,7 @@ public class CollectionUtils {
         for(int i= 0; i<arrayS.length; i++) {
             try {
                 arrayI[i] = Integer.parseInt(arrayS[i]);
-            }catch (NumberFormatException e){}
+            }catch (NumberFormatException ignored){}
         }
         return arrayI;
     }

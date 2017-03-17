@@ -28,6 +28,7 @@ import com.github.florent37.glidepalette.BitmapPalette;
 import com.github.florent37.glidepalette.GlidePalette;
 import com.google.android.youtube.player.YouTubeIntents;
 
+
 public class DetailMovieActivity extends AppCompatActivity implements OnFragmentInteractionListener{
 
     private static final String TAG = "DetailMovieActivity";
@@ -53,6 +54,7 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
 
         mMovie = getIntent().getParcelableExtra("content");
         mFav_id = getFavId();
+
         mBinding.toolbarLayout.setTitle(mMovie.getTitle());
 
         mBinding.tvTitle.setText(mMovie.getTitle());
@@ -61,6 +63,7 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
         mBinding.tvDate.setText(PMDateUtil.dateToString(this, PMDateUtil.getDate(mMovie.getRelease_date()), true));
 
         loadHeader(MovieUtil.makeImageUrl(mMovie.getBackdrop_path(), true));
+
         Glide.with(this).load(MovieUtil.makeImageUrl(mMovie.getPoster_path())).into(mBinding.ivPoster);
 
         updateFavButton(false);
@@ -146,8 +149,6 @@ public class DetailMovieActivity extends AppCompatActivity implements OnFragment
         }
         return super.onOptionsItemSelected(item);
     }
-
-
 
 
     @Override
